@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <style>
+        body,body.light{
+        --bg-pomodoro: #e1e1dd;
+        --color: black;
+        --color-w: white;
+        --color-lin: linear-gradient(var(--color), #808080);
+        --blur-color: rgba(0,0,0,0.2);
+        font-family: sans-serif;
+        font-family: "Karla", sans-serif;
+        
+
+    }
+    body.dark{
+        --bg-pomodoro: #202020;
+        --color: white;
+        --color-w: black;
+        --color-lin: linear-gradient(var(--color), #808080);
+        --blur-color: rgba(255,255,255,0.2);
+
+    }
+
+    body.dark .img-logo img{
+        filter: invert(1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        color: var(--color);
+    }
+
+    *:not(input) {
+        user-select: none;
+    }
+
+    html,
+    body {
+        height: 100vh;
+        width: 100vw;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-pomodoro);
+    }
+
+    .timer-wrapper {
+        display: flex;
+        flex-flow: column;
+        gap: 30px;
+    }
+
+    .timer {
+        position: relative;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-flow: column;
+        font-weight: 900;
+        font-size: 0;
+    }
+
+    .timer::after,
+    .timer::before {
+        content: "";
+        position: absolute;
+        height: 40px;
+        width: 100%;
+        user-select: none;
+        top: 0px;
+        background: linear-gradient(var(--bg-pomodoro), transparent);
+        z-index: 9;
+    }
+    .timer::after{
+        top: auto;
+        bottom: 0px;
+        background: linear-gradient(transparent, var(--bg-pomodoro));
+    }
+
+    .timer * {
+        background: var(--color-lin);
+        color: transparent;
+        background-clip: text;
+    }
+
+    .tabs {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 1.3rem;
+    }
+
+    .bottom {
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .border {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        border: solid 2px var(--color);
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .button {
+        cursor: pointer;
+        border: solid 2px var(--color);
+        padding: 7px 20px;
+        border-radius: 50px;
+        transition: 0.5s;
+    }
+
+    .selected{
+        color: var(--color-w);
+        background: var(--color);
+    }
+    .button:hover:not(.selected),
+    .border:hover:not(.selected) {
+        opacity: 0.7;
+        color: var(--color-w);
+        background: var(--color);
+    }
+
+    .img-logo {
+        height: 42px;
+        aspect-ratio: 1;
+    }
+
+    .img-logo img {
+        width: 65%;
+    }
+
+    .border:hover {
+        transition: transform 0.8s 0.5s;
+        transform: rotate(180deg);
+    }
+
+    .border:hover img {
+        filter: invert(1);
+    }
+
+    body.dark .border:hover img {
+        filter: invert(0);
+    }
+
+    .semicolon {
+        position: relative;
+        height: 50px;
+        width: 100%;
+    }
+    .semicolon span{
+        display: inline-block;
+        transform: translate(30%,-36%) rotate(90deg);
+    }
+    .semicolon::after,
+    .semicolon::before {
+        content: "";
+        transform: none;
+        position: absolute;
+        height: 30px;
+        user-select: none;
+        width: 100%;
+        inset: 0px;
+        background: linear-gradient(transparent, var(--bg-pomodoro));
+    }
+    .semicolon::before{
+        transform: translateY(-90%);
+    }
+    .semicolon::after{
+        top: 90%;
+        background: linear-gradient(var(--bg-pomodoro), transparent);
+    }
+    span>span {
+        font-size: 10rem;
+    }
+
+    .min,
+    .sec {
+        overflow: hidden;
+    }
+
+    .n1,
+    .n2 {
+        position: relative;
+        display: inline-block;
+        width: 0.7em;
+    }
+
+    .n1::after,
+    .n2::after {
+        content: attr(data-suffix);
+        position: absolute;
+        background: var(--color-lin);
+        color: transparent;
+        background-clip: text;
+        left: 0px;
+        width: 0.7em;
+        top: 100%;
+    }
+
+    .progress{
+        position: fixed;
+        inset: 0px;
+        bottom: none;
+        height: 10px;
+    }
+    .progress .progress-value{
+        height: 100%;
+        width: 0%;
+        border-top-right-radius: 25px;
+        border-bottom-right-radius: 25px;
+        background: var(--color);
+    }
+    @media screen and (min-width: 700px) {
+        .timer {
+            flex-flow: row;
+        }
+
+        .tabs {
+            font-size: 1.6rem;
+        }
+
+        .semicolon {
+            transform: none;
+            height: auto;
+            width: auto;
+            margin: 0px 30px;
+        }
+        .semicolon span{
+            transform: translateY(-10px);
+        }
+        .settings-wrapper .left{
+            font-size: 1.8rem;
+        }
+        .settings-wrapper .inp input{
+            font-size: 2rem;
+        }
+        .settings-cont{
+            width: 20vw;
+        }
+    }
+    .settings-cont{
+        display: none;
+        position: fixed;
+        border: solid var(--blur-color) 5px;
+        height: 90vh;
+        width: min(90vw,50vh);
+        z-index: 10;
+        backdrop-filter: blur(40px);
+        background: var(--blur-color);
+        border-radius: 20px;
+    }
+    .settings-cont.show{
+        display: block;
+    }
+    .close{
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        border-radius: 20px;
+        height: 30px;
+        width: 30px;
+        cursor: pointer;
+        background-color: #f34c4c;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        transition: 0.1s;
+    }
+    .close:hover{
+       background: red;
+    }
+    .settings-wrapper{
+        padding: 15% 5%;
+        height: 100%;
+        width: 100%;
+        overflow: auto;
+        font-size: 1.3rem;
+    }
+   .settings-cont .setting{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .inp{
+        display: flex;
+        gap: 0px;
+        align-items: center;
+        justify-content: center;
+    }
+    .inp input{
+        text-align: center;
+        background: transparent;
+        color: var(--color);
+        outline: none;
+        border: none;
+        border-radius: 20px;
+        font-size: 1.3rem;
+        padding: 5px 0px;
+        transition: 0.3s;
+    }
+    input:focus,input:hover{
+        background: var(--blur-color);
+    }
+    .inp .down,.inp .up{
+        display: flex;
+        font-family: monospace;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        height: 30px;
+        font-size: 1.5rem;
+        width: 30px;
+        border-radius: 50%;
+        transition: 0.3s;
+    }
+    .inp .down:hover,.inp .up:hover{
+        background: var(--blur-color);
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    /* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    border: solid transparent 0px;
+    border-top: solid 20px transparent;
+    border-bottom: solid 20px transparent;
+    background: var(--blur-color);
+    background-clip: content-box;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.6);
+}
+
+    /*Toggle Switch*/
+
+        label{
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            height: 30px;
+            aspect-ratio: 2.4;
+            border-radius: 100px;
+            background: var(--blur-color);
+            backdrop-filter: 20px;
+            position: relative;
+        }
+        label::after,label::before{
+            content:"";
+            position: absolute;
+            display: inline-block;
+            border-radius: 50px;
+            height: 70%;
+            width: 28%;
+            left: 5%;
+        }
+        label::after{
+            transition: 0.5s 0.75s width,
+                        0.5s 0.25s opacity,
+                        0.5s 0.75s left;
+            width: 28%;
+            opacity: 1;
+            background: rgba(247, 97, 8,0.8);
+        }
+        label::before{
+            transition: 0.5s width,
+                        0.5s 0.5s opacity,
+                        0.5s left;
+            width: calc(100% - 14%);
+            opacity: 0;
+            background: rgba(0, 191, 190,0.8);
+        }
+        input:checked+label::after{
+            transition: 0.5s width,
+                        0.5s 0.5s opacity;
+            width: calc(100% - 14%);
+            opacity: 0;
+        }
+        input:checked+label::before{
+            transition: 0.5s 0.75s width,
+                        0.5s 0.25s opacity,
+                        0.5s 0.75s left;
+            width: 28%;
+            left: calc(100% - 35%);
+            opacity: 1;
+        }
+        label#themelabel::after{
+            background: white;
+        }
+        label#themelabel::before{
+            background: black;
+        }
+</style>
+    </style>
+</head>
+
+<body class="dark">
+    <div class="progress">
+        <div class="progress-value"></div>
+    </div>
+    <div class="timer-wrapper">
+        <div class="tabs">
+            <div class="tab button focus selected">Focus</div>
+            <div class="tab button short">Short</div>
+            <div class="tab button long">Long</div>
+        </div>
+        <div class="timer">
+            <span class="min">
+                <span class="n1" data-suffix="-">-</span>
+                <span class="n2" data-suffix="-">-</span>
+            </span>
+            <span class="semicolon">
+                <span>:</span>
+            </span>
+            <span class="sec">
+                <span class="n1" data-suffix="-">-</span>
+                <span class="n2" data-suffix="-">-</span>
+            </span>
+        </div>
+        <div class="tabs bottom">
+            <div class="button start" id="button-imp">Start</div>
+            <div class="border img-logo" id="reset">
+                <img src="https://www.iconpacks.net/icons/2/free-refresh-icon-3104-thumb.png">
+            </div>
+            <div class="border img-logo" id="next">
+                <img src="https://static.thenounproject.com/png/1440783-200.png">
+            </div>
+            <div class="border img-logo" id="settings">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Windows_Settings_app_icon.png/1024px-Windows_Settings_app_icon.png">
+            </div>
+        </div>
+    </div>
+    <div class="settings-cont">
+        <div class="close" onclick="this.parentNode.classList.toggle('show');"></div>
+        <div class="settings-wrapper">
+            <div class="setting timesets"  id="focusTime">
+                <div class="left">Focus:</div>
+                <div class="right">
+                    <div class="inp">
+                        <div class="down">-</div>
+                        <input type="number" id='focusTime' min="0" max="60" value="25" step="1">
+                        <div class="up">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting timesets"  id="shortTime">
+                <div class="left">Short:</div>
+                <div class="right">
+                    <div class="inp">
+                        <div class="down">-</div>
+                        <input type="number" id="shortTime" min="0" max="60" value="5" step="1">
+                        <div class="up">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting timesets"  id="longTime">
+                <div class="left">Long:</div>
+                <div class="right">
+                    <div class="inp">
+                        <div class="down">-</div>
+                        <input type="number" id="longTime" min="0" max="60" value="15" step="1">
+                        <div class="up">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting timesets"  id="intervalTime">
+                <div class="left">interval:</div>
+                <div class="right">
+                    <div class="inp">
+                        <div class="down">-</div>
+                        <input type="number" id="longBreakIntervalCount" min="0" max="60" value="4" step="1">
+                        <div class="up">+</div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting" id="autoBreak">
+                <div class="left">Auto Start Break:</div>
+                <div class="right">
+                    <div class="wrapper">
+                        <div class="toggle">
+                            <input type="checkbox" checked id="autobreakcheck" hidden>
+                            <label for="autobreakcheck"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <br>
+            <hr>
+            <br>
+
+             <div class="setting" id="theme">
+                <div class="left">Theme Color:</div>
+                <div class="right">
+                    <div class="wrapper">
+                        <div class="toggle">
+                            <input type="checkbox" checked id="themeinp" hidden>
+                            <label id="themelabel" for="themeinp"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+    const oneSecond = 1000; //milli Second
+
+    // animation pomodoroSettings
+
+    const pomodoroSettings = {
+        animateTime: 700,
+        focusTime: 10 * 60,
+        shortTime: 2 * 60,
+        longTime: 5 * 60,
+        longBreakIntervalCount: 4,
+        autoStartBreak: true,
+    }
+
+    const buttonImp = document.querySelector("#button-imp");
+    let time = pomodoroSettings.focusTime;
+    let isRunning = false;
+    let tabs = ["focus", "short", "long"]
+    let currentTab = "focus";
+    let currentTimeout;
+    let isFirst = true;
+    let currentlongBreakIntervalCount = pomodoroSettings.longBreakIntervalCount;
+
+    function change(el, to) {
+        el = document.querySelector(el);
+        if (parseInt(el.innerText) == to) return;
+        el.style.transform = "translateY(-100%)";
+        el.setAttribute("data-suffix", el.innerText.trim());
+        el.innerText = to;
+        setTimeout(function() {
+            el.style.transition = (pomodoroSettings.animateTime) + "ms";
+            el.style.transform = "translateY(0%)";
+            setTimeout(function() {
+                el.style.transition = "0s";
+            }, pomodoroSettings.animateTime);
+        }, 10);
+    }
+
+    function updateTime(once) {
+        if (!once) {
+            time -= 1;
+        }
+
+        let min = parseInt(time / 60);
+        let sec = parseInt(time % 60);
+        if (sec < 10) {
+            sec = "0" + sec;
+        } else {
+            sec = "" + sec;
+        }
+        if (min < 10) {
+            min = "0" + min;
+        } else {
+            min = "" + min;
+        }
+
+        change(".min .n1", min[0])
+        change(".min .n2", min[1])
+        change(".sec .n1", sec[0])
+        change(".sec .n2", sec[1])
+        document.querySelector(".progress .progress-value").style.width = (100 - (100 * (time / pomodoroSettings[currentTab + "Time"]))) + "%";
+        if (isRunning && !once) {
+            currentTimeout = setTimeout(function() {
+                if (time == 0) {
+                    nextTab();
+                } else {
+                    updateTime();
+                }
+            }, oneSecond);
+        }
+    }
+
+    function start() {
+        if (!isFirst) {
+            resume();
+            return;
+        }
+        isFirst = false;
+        isRunning = true;
+        updateTime();
+    }
+
+    function resume() {
+        isRunning = true;
+        currentTimeout = setTimeout(function() {
+            updateTime();
+        }, oneSecond);
+    }
+
+    function pause() {
+        isRunning = false;
+        clearTimeout(currentTimeout);
+    }
+
+    function retry(add) {
+        isFirst = true;
+        pause();
+        buttonImp.innerText = "Start";
+        buttonImp.classList.remove("selected");
+        buttonImp.classList.add("start");
+        isRunning = false;
+        switch (currentTab) {
+            case "focus":
+                time = pomodoroSettings.focusTime;
+                break;
+            case "short":
+                time = pomodoroSettings.shortTime;
+                break;
+            case "long":
+                time = pomodoroSettings.longTime;
+                break;
+        };
+        updateTime(true);
+
+    };
+
+    function addListeners() {
+        buttonImp.addEventListener("click", function() {
+            if (this.classList.contains("start")) {
+                start();
+                this.innerText = "Pause";
+            } else {
+                pause();
+                this.innerText = "Resume";
+            }
+            this.classList.toggle("start");
+            this.classList.toggle("selected");
+        });
+
+        document.querySelector("#reset").addEventListener("click", retry);
+        document.querySelector("#next").addEventListener("click", nextTab);
+
+
+        document.querySelector(".tab.focus").addEventListener("click", function() { selectTab("focus") });
+        document.querySelector(".tab.short").addEventListener("click", function() { selectTab("short") });
+        document.querySelector(".tab.long").addEventListener("click", function() { selectTab("long") });
+
+        document.querySelectorAll("input[type=number]").forEach(function(el){
+            el.addEventListener("input",function(v){
+                if(this.value == "" || !this.checkValidity()){
+                    this.value = 0;
+                };
+                if (this.value[0] == "0") {
+                    this.value = +this.value;
+
+                }
+                if (this.id == "longBreakIntervalCount") {
+                    currentlongBreakIntervalCount = pomodoroSettings[this.id] = +this.value;
+                }else{
+                    pomodoroSettings[this.id] = (+this.value)*60;
+                }
+            })
+        });
+
+        document.querySelector("#autobreakcheck").addEventListener("change",function(){
+                pomodoroSettings.autoStartBreak = this.checked;
+         });
+
+        document.querySelector("#themeinp").addEventListener("change",function(){
+                if (this.checked) {
+                    document.body.classList.remove("light");
+                    document.body.classList.add("dark");
+                }else{
+                    document.body.classList.add("light");
+                    document.body.classList.remove("dark");
+                }
+         });
+
+
+        document.querySelectorAll(".timesets").forEach(function(el){
+                const inputel = el.querySelector("input[type=number");
+                el.querySelector(".up").addEventListener("click",function(){
+                    inputel.stepUp();
+                });
+                el.querySelector(".down").addEventListener("click",function(){
+                    inputel.stepDown();
+                });
+        });
+
+        document.querySelector("#settings").addEventListener("click",function(){
+                document.querySelector(".settings-cont").classList.toggle("show");
+         });
+
+        updateTime(true);
+    }
+
+    function selectTab(tabname) {
+        if (tabname == currentTab) {
+            return;
+        }
+        document.querySelector(".tab." + currentTab).classList.remove('selected');
+        document.querySelector(".tab." + tabname).classList.add("selected");
+        currentTab = tabname;
+        retry(true);
+    }
+
+    function nextTab() {
+        if (currentlongBreakIntervalCount <= 0 && currentTab == "focus") {
+            selectTab(tabs[2]);
+            currentlongBreakIntervalCount = pomodoroSettings.longBreakIntervalCount;
+        } else {
+            if (currentTab == "focus") {
+                selectTab("short");
+                currentlongBreakIntervalCount -= 1;
+            } else if (currentTab == "long" || currentTab == "short") {
+                selectTab("focus")
+            }
+        }
+        if (pomodoroSettings.autoStartBreak) {
+            start();
+            buttonImp.innerText = "Pause";
+            buttonImp.classList.toggle("start");
+            buttonImp.classList.toggle("selected");
+        }
+    }
+
+    addListeners();
+    </script>
+</body>
+
+</html>
